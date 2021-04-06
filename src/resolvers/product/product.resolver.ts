@@ -1,16 +1,10 @@
-import { Arg, Authorized, Field, InputType, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized,Mutation, Query, Resolver } from "type-graphql";
 import { Int } from "type-graphql";
 
-import { Product } from "../entities/product";
-import { RolesTypes } from "../entities/user";
+import { Product } from "../../entities/product";
+import { RolesTypes } from "../../entities/user";
+import {ProductInput} from "./product.input"
 
-@InputType()
-class ProductInput {
-    @Field()
-    name!: string
-    @Field()
-    quantity!: number
-}
 
 @Resolver()
 export class ProductResolver {

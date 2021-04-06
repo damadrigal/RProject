@@ -12,14 +12,15 @@ import {
     Authorized
 } from "type-graphql";
 import { hash, compare } from "bcryptjs";
-import { User } from "../entities/user";
+import { StateTypes, User } from "../../entities/user";
 
-import enviroment from "../config/enviroments.config";
+import enviroment from "../../config/enviroments.config";
 import { sign } from "jsonwebtoken";
 
-import { isAuthenticated } from "../middleware/is-authenticated";
-import { Context } from "../interfaces/context.interface";
-import { RolesTypes } from "../entities/user"
+import { isAuthenticated } from "../../middleware/is-authenticated";
+import { Context } from "../../interfaces/context.interface";
+import { RolesTypes } from "../../entities/user"
+import { UserInput } from "../users/user.input"
 
 @ObjectType()
 class LoginResponse {
@@ -27,17 +28,7 @@ class LoginResponse {
     accessToken?: string;
 }
 
-@InputType({ description: "Editable user information" })
-class UserInput {
-    @Field({ nullable: true })
-    name?: string
 
-    @Field()
-    notes!: string;
-
-    @Field(type => RolesTypes)
-    role!: RolesTypes;
-}
 
 
 @Resolver()
@@ -60,7 +51,6 @@ export class UserResolver {
     @Query(() => String)
     @UseMiddleware(isAuthenticated)
     async Me(@Ctx() { user }: Context) {
-        console.log(JSON.stringify(user));
 
         return `Your user id : ${user!.id}`;
     }
@@ -106,4 +96,22 @@ export class UserResolver {
             })
         };
     }
+
+    @Authorized("ADMIN")
+    @Mutation(() => User)
+    async SetUserPermision(@Arg("id") id: number, @Arg("rol") rol: RolesTypes) {
+        const user = await User.findOne({ where: { id } });
+        
+        if (!user) {
+            throw new Error("Could not find user");
+        }
+
+        if(!user.role){
+            user.role = rol;
+        }
+       
+        return await this.updateUser(id,user);
+    }
+
+
 }

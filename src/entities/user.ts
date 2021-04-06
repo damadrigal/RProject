@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column,CreateDateColumn, BaseEntity } from "typeorm";
 import { ObjectType, Field, ID, Authorized, registerEnumType } from "type-graphql";
 
 export enum RolesTypes {
@@ -6,6 +6,11 @@ export enum RolesTypes {
     ADMIN = "ADMIN",
     MODERATOR = "MODERATOR",
     BASIC = "BASIC"
+}
+
+export enum StateTypes {
+    ACTIVE = "ACTIVE",
+    DISABLE = "DISABLE"
 }
 
 registerEnumType(RolesTypes, {
@@ -53,4 +58,19 @@ export class User extends BaseEntity {
     @Field(type => RolesTypes)
     @Column("text", { nullable: true })
     role!: RolesTypes;
+
+    @Authorized(RolesTypes.ADMIN)
+    @Field(()=> String)
+    @CreateDateColumn({type:'timestamp'})
+    createdAt!:string;
+
+    @Authorized(RolesTypes.ADMIN)
+    @Field(()=> String)
+    @CreateDateColumn({type:'timestamp'})
+    updateAt!:string;
+
+    @Authorized(RolesTypes.ADMIN)
+    @Field(type => StateTypes)
+    @Column("text", { nullable: true })
+    state!: StateTypes;
 }
